@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Title</title>
+    <style>
+        *{margin:0;padding:0;box-sizing: border-box}
+        .main{
+            width: 400px;
+            height:400px;
+            background: seashell;
+            margin:100px auto;
+            position:relative;
+        }
+        .circle-mask{
+            position: absolute;
+            top:0;
+            width: 400px;
+            height:400px;
+            border-radius: 50%;
+            border:20px solid #dddddd;
+            z-index:1;
+            text-align: center;
+            line-height:400px;
+            font-size:60px;
+        }
+        .wrap{
+            z-index:2;
+            width: 200px;
+            height:400px;
+            position: absolute;
+            top:0;
+            overflow: hidden;
+        }
+        .left{
+            left:0;
+        }
+        .right{
+            right:0;
+        }
+        .circle{
+            width:400px;
+            height: 400px;
+            border:20px solid green;
+            border-radius:50%;
+            position:absolute;
+            top:0;
+            transition-timing-function: linear;
+            transition-property:all;
+        }
+        .circle-left{
+            left:0;
+            transform: rotate(0deg);
+            clip:rect(0,auto,auto,200px)
+        }
+        .circle-right{
+            right:0;
+            transform: rotate(0deg);
+            clip:rect(0,200px,auto,0)
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main" id="cirMain">
+    <div class="wrap left">
+        <div class="circle circle-left"></div>
+    </div>
+    <div class="wrap right">
+        <div class="circle circle-right"></div>
+    </div>
+    <div class="circle-mask">
+        <span>0</span>%
+    </div>
+</div>
+<script>
+    function CircleProgress(options){
+        this.initNum = options.initNum || 100
+        this.duration = options.duration || 2
+        this.mainCircle = document.querySelector(options.el)
+        this.circleLeft = this.mainCircle.querySelector('.circle-left')
+        this.circleRight = this.mainCircle.querySelector('.circle-right')
+        this.init()
+    }
+    CircleProgress.prototype.init = function(){
+        this.initDuration();
+        this.initPre();
+        this.initNumText();
+    }
+    //初始化数字百分比
+    CircleProgress.prototype.initNumText = function(){
+        var _this = this
+        var numTextDom = this.mainCircle.querySelector('.circle-mask span')
+        if(this.initNum>0){
+            var time = (this.duration*1000/this.initNum)
+            var count = 0;
+            var timer = setInterval(function(){
+                count++
+                numTextDom.innerText = count
+                if(count===_this.initNum){
+                    clearInterval(timer)
+                }
+            },time)
+        }
+    }
+    //初始化百分比
+    CircleProgress.prototype.initPre = function(){
+        var _this = this
+        if(this.initNum){
+            setTimeout(function(){
+                _this.move(_this.initNum)
+            })
+        }
+    }
+    //初始化过度时间
+    CircleProgress.prototype.initDuration = function(){
+        var circles = this.mainCircle.querySelectorAll('.circle')
+        var _this = this
+        if(typeof this.duration!=='number' || !this.duration){
+            throw new Error('duration要是大于0的数字')
+        }
+        circles.forEach(function(cir){
+            cir.style.transitionDuration = `${_this.duration/2}s`
+        })
+    }
+    CircleProgress.prototype.move = function(num){
+        var preDeg = 180/50;
+        if(num>0 && num<=50){
+            //如果在0到50之间就只旋转右圆形
+            this.circleRight.style.transform = `rotate(${num*preDeg}deg)`
+        }else if(num>50&&50<=100){
+            //如果在50到100之间要先旋转右圆
+            //然后等右圆旋转完再旋转左圆
+            var _this = this
+            var leftNum = num - 50
+            this.circleRight.style.transform = `rotate(${50*preDeg}deg)`
+
+
+            var dur = this.duration/2
+            var durationLeft = dur*1000 //右圆旋转完的时间或者说是多少秒后开始旋转左圆形
+            //设置左圆的过度时间100的话算满的dur没满的话算dur的百分比
+            this.circleLeft.style.transitionDuration = leftNum===50?`${dur}s`:`${leftNum/50*dur}s`
+            setTimeout(function(){
+                _this.circleLeft.style.transform = `rotate(${leftNum*preDeg}deg)`
+            },durationLeft)
+
+        }else{
+
+        }
+    }
+    var cir = new CircleProgress({
+        el:'#cirMain',
+        initNum:80
+    })
+    //    setTimeout(function(){
+    //        cir.move(90)
+    //    })
+
+    //    console.log(cir);
+</script>
+</body>
+</html>
