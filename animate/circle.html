@@ -145,7 +145,7 @@
             this.circleLeft.style.transitionDuration = leftNum===50?`${dur}s`:`${leftNum/50*dur}s`
             setTimeout(function(){
                 _this.circleLeft.style.transform = `rotate(${leftNum*preDeg}deg)`
-            },durationLeft)
+            },durationLeft-20)
 
         }else{
 
