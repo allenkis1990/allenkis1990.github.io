@@ -66,9 +66,9 @@
 <body>
 
 <div>
-    <button onclick="move(99)">circle99</button>
+    <button onclick="move(40)">circle40</button>
+    <button onclick="move(60)">circle60</button>
     <button onclick="move(80)">circle80</button>
-    <button onclick="move(33)">circle33</button>
 </div>
 <div class="main" id="cirMain">
     <div class="wrap left">
@@ -83,25 +83,27 @@
 </div>
 <script>
     function CircleProgress(options){
+        this.init(options)
+    }
+    CircleProgress.prototype.init = function(options){
         this.initNum = options.initNum || 100
         this.duration = options.duration || 2
-        this.mainCircle = document.querySelector(options.el)
+        this.el = options.el
+        this.initDom();
+        this.initPre();
+    }
+    CircleProgress.prototype.initDom = function(){
+        this.mainCircle = document.querySelector(this.el)
         this.circleLeft = this.mainCircle.querySelector('.circle-left')
         this.circleRight = this.mainCircle.querySelector('.circle-right')
-        this.init()
-    }
-    CircleProgress.prototype.init = function(){
-//        this.initDuration();
-//        this.initAnimateTemplate();
-        this.initPre();
-//        this.initNumText();
+        this.circles = this.mainCircle.querySelectorAll('.circle')
     }
     //初始化数字百分比
     CircleProgress.prototype.initNumText = function(){
         var _this = this
         var numTextDom = this.mainCircle.querySelector('.circle-mask span')
         if(this.initNum>0){
-            var time = (this.duration*1000/this.initNum)
+            var time = (this.duration*0.5*1000/this.initNum)
             var count = 0;
             var timer = setInterval(function(){
                 count++
@@ -148,6 +150,7 @@
                 transform: rotate(360deg);
                 visibility: hidden;
             }
+
             100%{
                 transform: rotate($$leftDeg$$deg);
             }
@@ -170,6 +173,7 @@
         var _this = this
         this.circleRight.style = ''
         this.circleLeft.style = ''
+        _this.initDuration()
         this.circleRight.style.transform = `rotate(${num*preDeg}deg)`
         var cssRules = Array.from(style.cssRules)
         var ruleIndexObj = _this.findRulesIndex(cssRules)
@@ -184,7 +188,6 @@
                 style.insertRule(_this.rightRule)
             }
             _this.circleRight.style.animationName = `ani-circle-right`
-            _this.initDuration()
         })
     }
     CircleProgress.prototype.moveRightLeftCircle = function(num,style,preDeg){
@@ -195,9 +198,25 @@
         //设置旋转的角度
         _this.circleRight.style = ''
         _this.circleLeft.style = ''
-        _this.circleRight.style.transform = `rotate(${50*preDeg}deg)`
-        _this.circleLeft.style.transform = `rotate(${360+leftNum*preDeg}deg)`
-        setTimeout(function(){
+        var p1 = new Promise(function(resolve){
+            _this.circleRight.style.display = 'none'
+            _this.circleLeft.style.display = 'none'
+            setTimeout(function(){
+                resolve();
+            },1)
+        })
+        var p2 = new Promise(function(resolve){
+            _this.initDom()
+            _this.initDuration()
+            _this.circleRight.style.transform = `rotate(${50*preDeg}deg)`
+            _this.circleLeft.style.transform = `rotate(${360+leftNum*preDeg}deg)`
+            setTimeout(function(){
+                resolve()
+            },2)
+        })
+        Promise.all([p1,p2]).then(function(){
+            _this.circleRight.style.display = 'block'
+            _this.circleLeft.style.display = 'block'
             //动态设置keyframe的deg
             _this.rightRule = _this.rightRule.replace(/\$\$rightDeg\$\$/ig,50*preDeg)
             _this.leftRule = _this.leftRule.replace(/\$\$leftDeg\$\$/ig,`${360+leftNum*preDeg}`)
@@ -223,8 +242,9 @@
 
             _this.circleRight.style.animationName = `ani-circle-right`
             _this.circleLeft.style.animationName = `ani-circle-left`
-            _this.initDuration()
         })
+
+
     }
     CircleProgress.prototype.move = function(num){
         this.initNum = num
@@ -247,8 +267,8 @@
     }
     var cir = new CircleProgress({
         el:'#cirMain',
-        initNum:70,
-        duration:1
+        initNum:100,
+        duration:2
     })
 
 
