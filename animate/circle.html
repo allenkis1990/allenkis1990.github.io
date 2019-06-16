@@ -47,17 +47,17 @@
             border-radius:50%;
             position:absolute;
             top:0;
-            transition-timing-function: linear;
-            transition-property:all;
+            animation-timing-function: linear;
         }
         .circle-left{
+            /*animation:ani-circle-left 2s linear;*/
             left:0;
-            transform: rotate(0deg);
             clip:rect(0,auto,auto,200px)
         }
         .circle-right{
+            /*transform: rotate(144deg);*/
+            /*animation:ani-circle-right 1s linear;*/
             right:0;
-            transform: rotate(0deg);
             clip:rect(0,200px,auto,0)
         }
 
@@ -87,6 +87,7 @@
     }
     CircleProgress.prototype.init = function(){
         this.initDuration();
+        this.initAnimateTemplate();
         this.initPre();
         this.initNumText();
     }
@@ -110,42 +111,83 @@
     CircleProgress.prototype.initPre = function(){
         var _this = this
         if(this.initNum){
-            setTimeout(function(){
-                _this.move(_this.initNum)
-            },100)
+            _this.move(_this.initNum)
         }
     }
     //初始化过度时间
     CircleProgress.prototype.initDuration = function(){
-        var circles = this.mainCircle.querySelectorAll('.circle')
         var _this = this
         if(typeof this.duration!=='number' || !this.duration){
             throw new Error('duration要是大于0的数字')
         }
-        circles.forEach(function(cir){
-            cir.style.transitionDuration = `${_this.duration/2}s`
-        })
+        this.circleLeft.style.animationDuration = `${_this.duration}s`
+        this.circleRight.style.animationDuration = `${_this.duration/2}s`
+    }
+    //初始化keyframe模板
+    CircleProgress.prototype.initAnimateTemplate = function(){
+        this.rightRule = `@keyframes ani-circle-right {
+            0%{
+                transform: rotate(0deg);
+        }
+            100%{
+                transform: rotate($$rightDeg$$deg);
+        }
+        }`
+
+        this.leftRule = `@keyframes ani-circle-left {
+            0%{
+                transform: rotate(180deg);
+                visibility: hidden;
+            }
+            50%{
+                transform: rotate(360deg);
+                visibility: hidden;
+            }
+            100%{
+                transform: rotate($$leftDeg$$deg);
+            }
+        }`
+
     }
     CircleProgress.prototype.move = function(num){
+        var _this = this
         var preDeg = 180/50;
+        var style = document.styleSheets[0]
+//        style.insertRule()
         if(num>0 && num<=50){
             //如果在0到50之间就只旋转右圆形
             this.circleRight.style.transform = `rotate(${num*preDeg}deg)`
+            setTimeout(function(){
+                //动态设置keyframe的deg
+                _this.rightRule = _this.rightRule.replace(/\$\$rightDeg\$\$/ig,num*preDeg)
+//                console.log(_this.rightRule);
+                //动态插入@keyframe
+                style.insertRule(_this.rightRule)
+                _this.circleRight.style.animationName = `ani-circle-right`
+            })
+
         }else if(num>50&&50<=100){
             //如果在50到100之间要先旋转右圆
             //然后等右圆旋转完再旋转左圆
-            var _this = this
             var leftNum = num - 50
-            this.circleRight.style.transform = `rotate(${50*preDeg}deg)`
-
-
             var dur = this.duration/2
-            var durationLeft = dur*1000 //右圆旋转完的时间或者说是多少秒后开始旋转左圆形
-            //设置左圆的过度时间100的话算满的dur没满的话算dur的百分比
-            this.circleLeft.style.transitionDuration = leftNum===50?`${dur}s`:`${leftNum/50*dur}s`
+//            this.circleLeft.style.animationDuration = leftNum===50?`${dur}s`:`${leftNum/50*dur+dur}s`
+            //设置旋转的角度
+            this.circleRight.style.transform = `rotate(${50*preDeg}deg)`
+            this.circleLeft.style.transform = `rotate(${360+leftNum*preDeg}deg)`
+
             setTimeout(function(){
-                _this.circleLeft.style.transform = `rotate(${leftNum*preDeg}deg)`
-            },durationLeft+20)
+                //动态设置keyframe的deg
+                _this.rightRule = _this.rightRule.replace(/\$\$rightDeg\$\$/ig,50*preDeg)
+                _this.leftRule = _this.leftRule.replace(/\$\$leftDeg\$\$/ig,`${360+leftNum*preDeg}`)
+                style.insertRule(_this.rightRule)
+                style.insertRule(_this.leftRule)
+                _this.circleRight.style.animationName = `ani-circle-right`
+                _this.circleLeft.style.animationName = `ani-circle-left`
+            })
+
+
+
 
         }else{
 
@@ -153,7 +195,8 @@
     }
     var cir = new CircleProgress({
         el:'#cirMain',
-        initNum:80
+        initNum:70,
+        duration:1
     })
     //    setTimeout(function(){
     //        cir.move(90)
