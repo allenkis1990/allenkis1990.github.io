@@ -3,45 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <style>
         *{margin:0;padding:0;}
+        h2{
+            font-size:50px;
+            text-align: center;
+        }
         .clear{
             overflow:hidden;
             _zoom:1;
         }
-        .box{width:1000px;margin:100px auto}
-        .main{float:left;margin:10px 10px;width:250px;height:160px;background:red;position:relative;overflow:hidden;}
-        .mask{position:absolute;width:100%;height:100%;background:#000;opacity:0.5;top:170px;left:0px;}
+        .box{width:1000px;margin:100px auto;box-sizing: border-box;}
+        .con{width: 810px;margin:0px auto;box-sizing: border-box;}
+        .main{float:left;margin:10px 10px;width:250px;height:160px;background:rgb(60,27,18);position:relative;overflow:hidden;}
+        .mask {
+            color: #fff;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            opacity: 0.2;
+            top: 170px;
+            left: 0px;
+            line-height:160px;
+            text-align:center;
+            font-size:50px;
+        }
     </style>
 </head>
 <body>
-<div class="clear box">
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
-    </div>
-    <div class="main">
-        <div class="mask"></div>
+<div class="box">
+    <h2>快速滑动以下方块，感受一下丝滑的感觉</h2>
+    <div class="con clear">
+        <div class="main">
+            <div class="mask">德</div>
+        </div>
+        <div class="main">
+            <div class="mask">芙</div>
+        </div>
+        <div class="main">
+            <div class="mask">就</div>
+        </div>
+        <div class="main">
+            <div class="mask">是</div>
+        </div>
+        <div class="main">
+            <div class="mask">这</div>
+        </div>
+        <div class="main">
+            <div class="mask">么</div>
+        </div>
+        <div class="main">
+            <div class="mask">湿</div>
+        </div>
+        <div class="main">
+            <div class="mask">滑</div>
+        </div>
+        <div class="main">
+            <div class="mask">^_^</div>
+        </div>
     </div>
 </div>
 <script>
@@ -71,20 +93,20 @@
         })
     }
     DesTopPlay.prototype.moveLeft = function(mask){
-        mask.style.left = '-250px';
+        mask.style.left = '-'+mask.offsetWidth+'px';
         mask.style.top = 0;
     }
     DesTopPlay.prototype.moveRight = function(mask){
-        mask.style.left = '250px';
+        mask.style.left = mask.offsetWidth+'px';
         mask.style.top = 0;
     }
     DesTopPlay.prototype.moveTop = function(mask){
         mask.style.left = 0;
-        mask.style.top = '-160px';
+        mask.style.top = '-'+mask.offsetHeight+'px';
     }
     DesTopPlay.prototype.moveBottom = function(mask){
         mask.style.left = 0;
-        mask.style.top = '160px';
+        mask.style.top = mask.offsetHeight+'px';
     }
     DesTopPlay.prototype.onmouseenter = function(){
         var _this = this
