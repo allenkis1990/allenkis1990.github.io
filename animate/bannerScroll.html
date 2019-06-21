@@ -68,6 +68,18 @@
         .next{
             right:0;
         }
+        .tab-box{overflow: hidden;z-index:999;position:absolute;right:10px;bottom:10px;}
+
+        .tab-box a {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            float: left;
+            margin-right:5px;
+            border:1px solid #fff;
+            transition: all 1s;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +91,11 @@
         <li></li>
         <li></li>
     </ul>
+    <div class="tab-box">
+        <a href="javascript:void(0)" style="background-color: #fff"></a>
+        <a href="javascript:void(0)"></a>
+        <a href="javascript:void(0)"></a>
+    </div>
 </div>
 <script>
     function BannerScroll(options){
@@ -87,6 +104,8 @@
     BannerScroll.prototype.init = function(options){
         var _this = this;
         this.scrollIndex = 0;
+        this.duration = options.duration || '2500';
+        this.timer = null;
         this.main = document.querySelectorAll(options.main)
         this.main.forEach(function(main){
             console.log(main);
@@ -97,55 +116,80 @@
         console.log(main);
         var scrollMain = main.querySelector(options.scrollMain)
         var items = scrollMain.querySelectorAll(options.item)
+        var tabBtns = main.querySelectorAll(options.tabBtn)
         var next = main.querySelector(options.next || '.next')
         var pre = main.querySelector(options.pre || '.pre')
-        this.initEvent(main,pre,next,items)
+        this.initEvent(main,pre,next,items,tabBtns)
+        this.autoPlay(items,tabBtns)
     }
-    BannerScroll.prototype.initEvent = function(main,pre,next,items){
+    BannerScroll.prototype.initEvent = function(main,pre,next,items,tabBtns){
         var _this = this
         next.addEventListener('click',function(e){
-            _this.next(e,items);
+            _this.next(e,items,tabBtns);
         })
         pre.addEventListener('click',function(e){
-            _this.pre(e,items);
+            _this.pre(e,items,tabBtns);
         })
         main.addEventListener('mouseenter',function(e){
             e.stopPropagation()
-            console.log(3);
+            clearInterval(_this.timer)
+            _this.timer = null
         })
         main.addEventListener('mouseleave',function(e){
             e.stopPropagation()
-            console.log(4);
+            _this.autoPlay(items,tabBtns)
         })
+        Array.from(tabBtns).forEach(function(tabBtn,i){
+            tabBtn.addEventListener('click',function(e){
+                e.stopPropagation()
+                _this.scrollIndex = i
+                _this.move(items,tabBtns)
+            })
+        })
+
     }
-    BannerScroll.prototype.pre = function(e,items){
+    BannerScroll.prototype.pre = function(e,items,tabBtns){
         e.stopPropagation()
         this.scrollIndex --
         if(this.scrollIndex<0){
             this.scrollIndex = items.length -1
         }
-        this.move(items)
+        this.move(items,tabBtns)
 
     }
-    BannerScroll.prototype.next = function(e,items){
+    BannerScroll.prototype.next = function(e,items,tabBtns){
         e.stopPropagation()
         this.scrollIndex ++
         if(this.scrollIndex>items.length -1){
             this.scrollIndex = 0
         }
-        this.move(items)
+        this.move(items,tabBtns)
 
     }
-    BannerScroll.prototype.move = function(items){
-        items.forEach(function(item){
+    //自动轮播
+    BannerScroll.prototype.autoPlay = function(items,tabBtns){
+        var _this = this
+        this.timer = setInterval(function(){
+            _this.scrollIndex ++
+            if(_this.scrollIndex>items.length -1){
+                _this.scrollIndex = 0
+            }
+            _this.move(items,tabBtns)
+        },this.duration)
+    }
+    BannerScroll.prototype.move = function(items,tabBtns){
+        Array.from(items).forEach(function(item,i){
             item.style.opacity = 0
+            Array.from(tabBtns)[i].style.backgroundColor = ''
         })
-        items[this.scrollIndex].style.opacity = 1
+        Array.from(items)[this.scrollIndex].style.opacity = 1
+        Array.from(tabBtns)[this.scrollIndex].style.backgroundColor = '#fff'
     }
     new BannerScroll({
         main:'.main',
         scrollMain:'ul',
-        item:'li'
+        item:'li',
+        tabBtn:'.tab-box a'
     })
 </script>
 </body>

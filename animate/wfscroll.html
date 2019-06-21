@@ -51,24 +51,26 @@
     //把克隆后的item插入到scrollMain
     WfScroll.prototype.addLastItem = function(){
         var _this = this
-        Array.from(this.items).forEach(function(i,index){
-            if(index<_this.lastItemNum){
-                var child = _this.getCloneItem(i)
-                _this.scrollMain.appendChild(child)
+        var lastItemStr = Array.from(this.items).reduce(function(pre,next,idx){
+            if(idx<_this.lastItemNum){
+                pre = pre+next.outerHTML
             }
+            return pre;
+        },'')
+        var childs = _this.getCloneItems(lastItemStr)
+        childs.forEach(function(child){
+            _this.scrollMain.appendChild(child)
         })
+        childs = null
     }
 
     //克隆前N个item
-    WfScroll.prototype.getCloneItem = function(i){
-        var child = document.createElement(i.nodeName.toLowerCase())
-        child.innerHTML = i.innerHTML
-        console.log(i.attributes);
-        Array.from(i.attributes).forEach(function(attr){
-            console.log(attr.nodeName);
-            child.setAttribute(attr.nodeName,i.getAttribute(attr.nodeName))
-        })
-        return child;
+    WfScroll.prototype.getCloneItems = function(str){
+        var temp = document.createElement('div')
+        var content = document.createElement('div')
+        temp.appendChild(content)
+        content.outerHTML = str
+        return Array.from(temp.childNodes);
     }
 
     WfScroll.prototype.autoPlay = function () {
