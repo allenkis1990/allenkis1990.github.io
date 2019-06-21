@@ -15,9 +15,6 @@
             line-height:350px;
             font-size:100px;
         }
-        .show{
-            opacity: 1;
-        }
         ul{
             width:100%;
             height:100%;
@@ -112,6 +109,7 @@
             _this.initDom(options,main)
         })
     }
+    //初始化dom元素变量
     BannerScroll.prototype.initDom = function(options,main){
         console.log(main);
         var scrollMain = main.querySelector(options.scrollMain)
@@ -122,6 +120,7 @@
         this.initEvent(main,pre,next,items,tabBtns)
         this.autoPlay(items,tabBtns)
     }
+    //初始化dom事件
     BannerScroll.prototype.initEvent = function(main,pre,next,items,tabBtns){
         var _this = this
         next.addEventListener('click',function(e){
@@ -148,6 +147,7 @@
         })
 
     }
+    //上一张
     BannerScroll.prototype.pre = function(e,items,tabBtns){
         e.stopPropagation()
         this.scrollIndex --
@@ -157,6 +157,7 @@
         this.move(items,tabBtns)
 
     }
+    //下一张
     BannerScroll.prototype.next = function(e,items,tabBtns){
         e.stopPropagation()
         this.scrollIndex ++
@@ -177,6 +178,7 @@
             _this.move(items,tabBtns)
         },this.duration)
     }
+    //公用move
     BannerScroll.prototype.move = function(items,tabBtns){
         Array.from(items).forEach(function(item,i){
             item.style.opacity = 0
@@ -189,7 +191,8 @@
         main:'.main',
         scrollMain:'ul',
         item:'li',
-        tabBtn:'.tab-box a'
+        tabBtn:'.tab-box a',
+        duration:2000
     })
 </script>
 </body>
