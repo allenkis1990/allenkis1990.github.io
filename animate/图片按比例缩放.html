@@ -7,7 +7,6 @@
         *{margin:0;padding:0;box-sizing: border-box}
         .main{
             margin-left:20px;
-            width:200px;
             border:1px solid red;
             overflow: hidden;
         }
@@ -15,16 +14,13 @@
     </style>
 </head>
 <body>
-<div class="main">
-    <img src="./images/user_image_container.png">
-</div>
 <script>
-    function AutoSize(Img, maxWidth, maxHeight,autoHeight,autoWidth) {
+    function AutoSize(Img, maxWidth, maxHeight,direction) {
         var image = new Image();
         //原图片原始地址（用于获取原图片的真实宽高，当<img>标签指定了宽、高时不受影响）
         image.onload=function(){
-            console.log(image.width);
-            console.log(image.height);
+//            console.log(image.width);
+//            console.log(image.height);
             // 当图片比图片框小时不做任何改变
             if (image.width < maxWidth&& image.height < maxHeight) {
                 Img.setAttribute('width',image.width)
@@ -46,25 +42,66 @@
                 }
             }
 
-//            if(autoHeight){
-//                Img.setAttribute('height',image.height)
-//            }
-//            if(autoWidth){
-//                Img.setAttribute('width',image.width)
-//            }
-
-            //如果生成出来的宽小于最大宽度，那就居中
+            //如果生成出来的宽高小于最大宽度和最大高度，那就居中
             var w = Img.getAttribute('width')
-            if(w!==Number(maxWidth)){
-                Img.style.marginLeft = (Number(maxWidth)/2)-(w/2)+'px'
+            var H = Img.getAttribute('height')
+
+            console.log(H);
+//            if(direction==='column'){
+//                if(w!==Number(maxWidth)){
+//                    Img.style.marginLeft = (Number(maxWidth)/2)-(w/2)+'px'
+//                }
+//            }
+//            if(direction==='row'){
+//                if(H!==Number(maxHeight)){
+//                    Img.style.marginTop = (Number(maxHeight)/2)-(H/2)+'px'
+//                }
+//            }
+//            if(!direction){
+//                if (H !== Number(maxHeight)) {
+//                    Img.style.marginTop = (Number(maxHeight) / 2) - (H / 2) + 'px'
+//                }
+//
+//                if (w !== Number(maxWidth)) {
+//                    Img.style.marginLeft = (Number(maxWidth) / 2) - (w / 2) + 'px'
+//                }
+//            }
+            if (H !== Number(maxHeight)) {
+                Img.style.marginTop = (Number(maxHeight) / 2) - (H / 2) + 'px'
             }
 
+            if (w !== Number(maxWidth)) {
+                Img.style.marginLeft = (Number(maxWidth) / 2) - (w / 2) + 'px'
+            }
         }
         image.src = Img.getAttribute('src');
     }
-    var img = document.querySelector('img')
-    AutoSize(img,200,420)
 
+
+
+    function createImg(src,cb){
+        var newImg = new Image()
+        newImg.src = src
+        newImg.onload = function(){
+            cb&&cb(newImg)
+        }
+    }
+
+    function createImgItem(src,boxW,boxH){
+        createImg(src,function(img){
+            var maxW = boxW||img.width,maxH = boxH||img.height
+            var main = document.createElement('div')
+            main.style.width = maxW+'px'
+            main.style.height = maxH+'px'
+            main.setAttribute('class','main')
+            AutoSize(img,maxW,maxH)
+            main.appendChild(img)
+            document.body.appendChild(main)
+        })
+    }
+
+    createImgItem('./images/afei.jpg',400,400);
+    createImgItem('./images/user_image_container.png',200,200);
 </script>
 </body>
 </html>

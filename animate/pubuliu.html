@@ -3,8 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        @keyframes imgshow {
+            0%{
+                margin-top:20px;
+            }
+            100%{
+                margin-top:0;
+            }
+        }
+        *{padding:0;margin:0;box-sizing:border-box;}
+        li{list-style-type: none;}
+        .box {
+            margin: 0px auto;
+            padding: 0px 10px;
+        }
+        .contentBox{
+            overflow: hidden;
+            margin:0 auto;
+        }
+        li{
+            overflow: hidden;
+            margin-right:10px;
+            margin-bottom:10px;
+            border:1px solid transparent;
+            animation-name: imgshow;
+            animation-duration: 1s;
+            animation-timing-function: linear;
+        }
+        li:hover{
+            border:1px solid royalblue;
+        }
+        li:last-child{margin-bottom:0px;}
+        ul{
+            float:left;
+        }
+        ul:last-child li{margin-right:0px;}
+        img{float:left;}
+        .pending,.pending img{
+            width:200px;
+            height:200px;
+            position:fixed;
+            left:50%;
+            top:50%;
+            margin-left:-100px;
+            margin-top:-100px;
+        }
+        .pending{display:none;}
+    </style>
 </head>
 <body>
+<div class="pending">
+    <img src="./images/pending.gif" alt="">
+</div>
+<div class="box">
+    <div class="contentBox"></div>
+</div>
+<script>
 
+    //工具AJAX函数
+    function $http(method,url,cb){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState ===4){
+                if(xhr.status>=200&&xhr.status<400){
+//                    console.log(xhr.responseText);
+                    cb && cb(xhr.responseText);
+                }
+            }
+        }
+        xhr.open(method,url)
+        xhr.send(null)
+    }
+
+    function Pubuliu(){
+        //初始化变量
+        this.totalImgArr = [];//缓存每次异步请求的图片
+        this.completeTime = 0;//图片加载完成时间
+        this.resizeTime = 0;//窗口调整大小的结束时间
+        this.pending = false;//图片排版时间
+        this.pendingDom = document.querySelector('.pending')
+        this.start()
+    }
+
+
+    //按比例缩放图片
+    Pubuliu.prototype.AutoSize = function(Img, maxWidth, maxHeight,cb){
+        var image = new Image();
+        //原图片原始地址（用于获取原图片的真实宽高，当<img>标签指定了宽、高时不受影响）
+        image.onload=function(){
+//            console.log(image.width);
+//            console.log(image.height);
+            // 当图片比图片框小时不做任何改变
+            if (image.width < maxWidth&& image.height < maxHeight) {
+                Img.setAttribute('width',image.width)
+                Img.setAttribute('height',image.height)
+            }
+            else //原图片宽高比例 大于 图片框宽高比例,则以框的宽为标准缩放，反之以框的高为标准缩放
+            {
+                if (maxWidth/ maxHeight  <= image.width / image.height) //原图片宽高比例 大于 图片框宽高比例
+                {
+                    // Img.width = maxWidth;   //以框的宽度为标准
+                    // Img.height = maxWidth* (image.height / image.width);
+                    Img.setAttribute('width',maxWidth)
+                    Img.setAttribute('height',maxWidth* (image.height / image.width))
+                }
+                else {   //原图片宽高比例 小于 图片框宽高比例
+
+                    Img.setAttribute('width',maxHeight  * (image.width / image.height))
+                    Img.setAttribute('height',maxHeight)
+                }
+            }
+
+            //如果生成出来的宽高小于最大宽度和最大高度，那就居中
+            var w = Img.getAttribute('width')
+            var H = Img.getAttribute('height')
+
+//            console.log(H);
+//            if(direction==='column'){
+//                if(w!==Number(maxWidth)){
+//                    Img.style.marginLeft = (Number(maxWidth)/2)-(w/2)+'px'
+//                }
+//            }
+//            if(direction==='row'){
+//                if(H!==Number(maxHeight)){
+//                    Img.style.marginTop = (Number(maxHeight)/2)-(H/2)+'px'
+//                }
+//            }
+//            if(!direction){
+//                if (H !== Number(maxHeight)) {
+//                    Img.style.marginTop = (Number(maxHeight) / 2) - (H / 2) + 'px'
+//                }
+//
+//                if (w !== Number(maxWidth)) {
+//                    Img.style.marginLeft = (Number(maxWidth) / 2) - (w / 2) + 'px'
+//                }
+//            }
+//            if (H !== Number(maxHeight)) {
+//                Img.style.marginTop = (Number(maxHeight) / 2) - (H / 2) + 'px'
+//            }
+
+            if (w !== Number(maxWidth)) {
+                Img.style.marginLeft = (Number(maxWidth) / 2) - (w / 2) + 'px'
+            }
+
+            cb && cb(w,H)
+        }
+        image.src = Img.getAttribute('src');
+    }
+
+    //图片读取器
+    Pubuliu.prototype.createImg = function(src,cb){
+        var newImg = new Image()
+        newImg.src = src
+        newImg.onload = function(){
+            cb&&cb(newImg)
+        }
+    }
+
+    //生成图片并且自动调整好适合的比例大小，然后出入列
+    Pubuliu.prototype.createImgItem = function(src,boxW,boxH,parent,cb){
+        var _this = this
+        this.createImg(src,function(img){
+            var maxW = boxW||img.width,maxH = boxH||img.height
+            var main = document.createElement('li')
+            main.style.width = maxW+'px'
+//            main.setAttribute('class','main')
+            _this.AutoSize(img,maxW,maxH,function(w,h){
+                main.style.height = h+'px'
+                main.appendChild(img)
+                parent.appendChild(main)
+                cb && cb()
+            })
+        })
+    }
+
+    //获取最短的那一列
+    Pubuliu.prototype.getMinColumn = function(){
+        var columns = Array.from(document.querySelectorAll('ul'))
+        var column = columns.reduce(function(pre,next){
+            if(next.offsetHeight<pre.offsetHeight){
+                pre = next
+            }
+            return pre
+        },columns[0])
+        return column
+    }
+
+
+    Pubuliu.prototype.removePending = function(){
+        this.pendingDom.style.display = 'none'
+        this.pending = false
+    }
+
+    Pubuliu.prototype.appendPending = function(){
+        this.pendingDom.style.display = 'block'
+        this.pending = true
+    }
+
+
+
+    //把图片放到最短的那一列
+    Pubuliu.prototype.appendRightParent = function(data,count,column){
+        var _this = this
+        this.createImgItem(data[count].path,300,null,column,function(){
+            column = _this.getMinColumn();
+            count++
+            if(count>data.length-1){
+                console.log('当前批次图片插入完成');
+                setTimeout(function(){
+                    _this.removePending()
+                },600)
+                _this.completeTime = new Date().getTime();
+            } else {
+                _this.appendRightParent(data,count,column)
+            }
+        });
+    }
+
+    //ajax获取图片
+    Pubuliu.prototype.getImgData = function(){
+        var _this = this
+        if(this.pending){
+            return false
+        }
+//        this.pending = true
+        _this.appendPending()
+        $http('get','./img.json',function(data){
+            data = JSON.parse(data)
+            //每次请求的图片都缓存起来
+            _this.totalImgArr = _this.totalImgArr.concat(data)
+//            console.log(totalImgArr);
+            var count = 0
+            var column = _this.getMinColumn();
+            _this.appendRightParent(data,count,column)
+        })
+    }
+
+    //初始化列的个数，列的个数等于屏幕的宽度/每个图片的定宽
+    Pubuliu.prototype.initColumn = function(cb){
+        var docW = document.documentElement.clientWidth
+        var box = document.querySelector('.box')
+        var contentBox = document.querySelector('.contentBox')
+        //清空列
+        contentBox.innerHTML = '';
+        box.style.width = docW + 'px'
+        //列的个数等于(窗口的宽度-左右padding-最后一列没有的margin-right)/(宽度300+margin-right)
+        var ulNum = Math.floor((docW-20-10)/310)
+        //动态计算包裹N个列的容器的宽度，用于居中这些列
+        contentBox.style.width = 310*ulNum+'px'
+        for(let i =0;i<ulNum;i++){
+            var column = document.createElement('ul')
+            contentBox.appendChild(column)
+        }
+        cb&&cb();
+    }
+
+    //初始化一些事件
+    Pubuliu.prototype.initEvents = function(){
+        var _this = this
+        window.addEventListener('resize',function(){
+            _this.resize()
+        })
+        window.addEventListener('scroll',function(){
+            _this.scroll();
+        })
+    }
+
+    //下滑滚动条
+    Pubuliu.prototype.scroll = function(){
+        var _this = this
+        var root = document.documentElement || document.body
+        var box = document.querySelector('.box')
+//        console.log('scrollTop:'+root.scrollTop);
+//        console.log('box:'+box.offsetHeight);
+        //滚到一定程度加载更多
+        if(root.scrollTop>box.offsetHeight-500){
+            _this.getImgData();
+        }
+    }
+
+    //调整屏幕大小
+    Pubuliu.prototype.resize = function(){
+        var _this = this
+        var now = new Date().getTime()
+//            console.log(now - resizeTime);
+        //防止调整频率太快导致多次执行
+        if(now - this.resizeTime>300){
+            setTimeout(function(){
+                _this.initColumn(function(){
+//                    console.log(_this.totalImgArr);
+                    var count = 0
+                    var column = _this.getMinColumn();
+//                    _this.pending = true;
+                    _this.appendPending()
+                    _this.appendRightParent(_this.totalImgArr,count,column)
+                });
+            },800)
+        }
+        _this.resizeTime = new Date().getTime()
+    }
+
+    //启动程序
+    Pubuliu.prototype.start = function(){
+        var _this = this
+        this.initEvents();
+        this.initColumn(function(){
+            _this.getImgData();
+        });
+    }
+
+    var pbl = new Pubuliu()
+
+</script>
 </body>
 </html>
