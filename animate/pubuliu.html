@@ -91,6 +91,10 @@
         this.resizeTime = 0;//窗口调整大小的结束时间
         this.pending = false;//图片排版时间
         this.pendingDom = document.querySelector('.pending')
+        //2000宽度下 图片宽度为300，超过2000图片宽度要按比例增加,防止屏幕太大不出现滚动条
+        this.baseImgW = 300
+        this.maxBaseWinW = 2000
+        this.imgW = null
     }
 
     //按比例缩放图片
@@ -212,7 +216,7 @@
     //把图片放到最短的那一列
     Pubuliu.prototype.appendRightParent = function(data,count,column){
         var _this = this
-        this.createImgItem(data[count].path,300,null,column,function(){
+        this.createImgItem(data[count].path,_this.imgW,null,column,function(){
             column = _this.getMinColumn();
             count++
             if(count>data.length-1){
@@ -255,27 +259,35 @@
 
     //初始化列的个数，列的个数等于屏幕的宽度/每个图片的定宽
     Pubuliu.prototype.initColumn = function(cb){
-        var docW = document.documentElement.clientWidth
+        var root = document.documentElement || document.body
+        var docW = root.clientWidth
         var box = document.querySelector('.box')
         var contentBox = document.querySelector('.contentBox')
         //清空列
         contentBox.innerHTML = '';
-        if(!this.loadFirstImgGroup){
-            box.style.width = docW-30 + 'px'
-        }else{
-            box.style.width = docW + 'px'
+        //防止页面出现横向滚动条
+        docW = docW -30
+        box.style.width = docW + 'px'
+
+        this.imgW = this.baseImgW
+        //2000宽度下 图片宽度为300，超过2000图片宽度要按比例增加,防止屏幕太大不出现滚动条
+        if(docW>this.maxBaseWinW){
+            this.imgW = docW*this.baseImgW/this.maxBaseWinW
+            console.log(this.imgW);
         }
+
         //列的个数等于(窗口的宽度-左右padding-最后一列没有的margin-right)/(宽度300+margin-right)
-        var ulNum = Math.floor((docW-20-10)/310)
+        var ulNum = Math.floor((docW-20-10)/(this.imgW+10))
+        console.log(ulNum);
         //动态计算包裹N个列的容器的宽度，用于居中这些列
 
 
         //屏幕很小的时候固定显示一列
         if(ulNum<1){
             ulNum = 1
-            contentBox.style.width = 300*1+'px'
+            contentBox.style.width = this.imgW*1+'px'
         }else{
-            contentBox.style.width = 310*ulNum+'px'
+            contentBox.style.width = (this.imgW+10)*ulNum+'px'
         }
         for(let i =0;i<ulNum;i++){
             var column = document.createElement('ul')
