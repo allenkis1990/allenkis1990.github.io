@@ -59,6 +59,9 @@
 <div class="box">
     <div class="contentBox"></div>
 </div>
+<div id="fuck"></div>
+<div id="shit"></div>
+<div id="total"></div>
 <script>
 
     //工具AJAX函数
@@ -270,21 +273,25 @@
         })
     }
 
-    //下滑滚动条
+    Pubuliu.prototype.initScroller = function(){
+        var root = document.documentElement || document.body
+        root.scrollTop = 0
+    }
+    //下滑滚动条 当scrollTop+可视高度>=文档高度的时候（到底部）触发加载更多
     Pubuliu.prototype.scroll = function(){
         var _this = this
         var root = document.documentElement || document.body
-        var box = document.querySelector('.box')
-//        console.log('scrollTop:'+root.scrollTop);
-//        console.log('box:'+box.offsetHeight);
-        //滚到一定程度加载更多
-        if(root.scrollTop>box.offsetHeight-500){
+        var docH = root.scrollHeight
+        var winH = root.clientHeight
+        var scrollTop = root.scrollTop
+        if(winH+scrollTop>=docH-150){
             _this.getImgData();
         }
     }
 
     //调整屏幕大小
     Pubuliu.prototype.resize = function(){
+        console.log(11111);
         var _this = this
         var now = new Date().getTime()
 //            console.log(now - resizeTime);
