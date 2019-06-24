@@ -59,9 +59,6 @@
 <div class="box">
     <div class="contentBox"></div>
 </div>
-<div id="fuck"></div>
-<div id="shit"></div>
-<div id="total"></div>
 <script>
 
     //工具AJAX函数
@@ -254,7 +251,15 @@
         //列的个数等于(窗口的宽度-左右padding-最后一列没有的margin-right)/(宽度300+margin-right)
         var ulNum = Math.floor((docW-20-10)/310)
         //动态计算包裹N个列的容器的宽度，用于居中这些列
-        contentBox.style.width = 310*ulNum+'px'
+
+
+        //屏幕很小的时候固定显示一列
+        if(ulNum<1){
+            ulNum = 1
+            contentBox.style.width = 300*1+'px'
+        }else{
+            contentBox.style.width = 310*ulNum+'px'
+        }
         for(let i =0;i<ulNum;i++){
             var column = document.createElement('ul')
             contentBox.appendChild(column)
