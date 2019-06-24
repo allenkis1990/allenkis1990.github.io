@@ -78,14 +78,20 @@
 
     function Pubuliu(){
         //初始化变量
+        this.initVar()
+        this.start()
+    }
+
+    //初始化变量
+    Pubuliu.prototype.initVar = function(){
+        this.windowW = 0;//浏览器可视宽度
+        this.loadFirstImgGroup = false;//是否第一次读取完好第一组AJAX请求的所有的图片
         this.totalImgArr = [];//缓存每次异步请求的图片
         this.completeTime = 0;//图片加载完成时间
         this.resizeTime = 0;//窗口调整大小的结束时间
         this.pending = false;//图片排版时间
         this.pendingDom = document.querySelector('.pending')
-        this.start()
     }
-
 
     //按比例缩放图片
     Pubuliu.prototype.AutoSize = function(Img, maxWidth, maxHeight,cb){
@@ -215,6 +221,13 @@
                     _this.removePending()
                 },600)
                 _this.completeTime = new Date().getTime();
+                //读取完第一个ajax请求的所有图片后把loadFirstImgGroup设置为true
+                if(!_this.loadFirstImgGroup){
+                    var root = document.documentElement || document.body
+                    //把浏览器可视宽度存起来
+                    _this.windowW = root.clientWidth;//浏览器可视宽度
+                    _this.loadFirstImgGroup = true;
+                }
             } else {
                 _this.appendRightParent(data,count,column)
             }
@@ -296,21 +309,29 @@
 
     //调整屏幕大小
     Pubuliu.prototype.resize = function(){
-        console.log(11111);
         var _this = this
         var now = new Date().getTime()
 //            console.log(now - resizeTime);
         //防止调整频率太快导致多次执行
         if(now - this.resizeTime>300){
             setTimeout(function(){
-                _this.initColumn(function(){
+                //resize页面后重新计算浏览器可视宽度，如果宽度没变就不需要重新加载,否则要重新重新加载
+                var root = document.documentElement || document.body
+                if(_this.windowW!==root.clientWidth){
+                    _this.initColumn(function(){
 //                    console.log(_this.totalImgArr);
-                    var count = 0
-                    var column = _this.getMinColumn();
+                        var count = 0
+                        var column = _this.getMinColumn();
 //                    _this.pending = true;
-                    _this.appendPending()
-                    _this.appendRightParent(_this.totalImgArr,count,column)
-                });
+                        _this.appendPending()
+                        _this.appendRightParent(_this.totalImgArr,count,column)
+                    });
+                    _this.windowW = root.clientWidth;//浏览器可视宽度
+                    //页面调整后要恢复成第一次加载
+                    _this.loadFirstImgGroup = false
+                }else{
+                    console.log('高度变化不进行重新加载');
+                }
             },800)
         }
         _this.resizeTime = new Date().getTime()
