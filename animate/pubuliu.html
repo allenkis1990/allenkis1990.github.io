@@ -242,7 +242,7 @@
         }
 //        this.pending = true
         _this.appendPending()
-        $http('get','./img.json',function(data){
+        $http('get','./img.json?t='+new Date().getTime(),function(data){
             data = JSON.parse(data)
             //每次请求的图片都缓存起来
             _this.totalImgArr = _this.totalImgArr.concat(data)
