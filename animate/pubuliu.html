@@ -260,7 +260,11 @@
         var contentBox = document.querySelector('.contentBox')
         //清空列
         contentBox.innerHTML = '';
-        box.style.width = docW + 'px'
+        if(!this.loadFirstImgGroup){
+            box.style.width = docW-30 + 'px'
+        }else{
+            box.style.width = docW + 'px'
+        }
         //列的个数等于(窗口的宽度-左右padding-最后一列没有的margin-right)/(宽度300+margin-right)
         var ulNum = Math.floor((docW-20-10)/310)
         //动态计算包裹N个列的容器的宽度，用于居中这些列
