@@ -284,7 +284,9 @@
     Pubuliu.prototype.initEvents = function(){
         var _this = this
         window.addEventListener('resize',function(){
-            _this.resize()
+            if(!_this.pending){
+                _this.resize()
+            }
         })
         window.addEventListener('scroll',function(){
             _this.scroll();
