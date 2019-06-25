@@ -273,11 +273,11 @@
         //2000宽度下 图片宽度为300，超过2000图片宽度要按比例增加,防止屏幕太大不出现滚动条
         if(docW>this.maxBaseWinW){
             this.imgW = docW*this.baseImgW/this.maxBaseWinW
-            console.log(this.imgW);
+//            console.log(this.imgW);
         }
 
         //列的个数等于(窗口的宽度-左右padding-最后一列没有的margin-right)/(宽度300+margin-right)
-        var ulNum = Math.floor((docW-20-10)/(this.imgW+10))
+        var ulNum = Math.floor((docW-20-10+30)/(this.imgW+10))
         console.log(ulNum);
         //动态计算包裹N个列的容器的宽度，用于居中这些列
 
