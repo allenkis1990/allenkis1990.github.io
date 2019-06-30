@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{margin:0;padding:0;}
+        .box{width:550px; height:710px; border:5px solid cornflowerblue; margin:10px auto 0;position:relative;overflow: hidden;}
+        .plane{width:40px;height:50px;background: red;position: absolute;left:0px;bottom:0px;cursor: pointer }
+        .zidan{width:10px; height:10px; background:#000; position: absolute;}
+        .diji{width:40px;height:40px;background:green;position: absolute;transition: opacity 0.2s}
+        h2{text-align: center}
+    </style>
+</head>
+<body>
+<h2>当前歼灭敌机<span style="color:red" class="beatCount">0</span>架</h2>
+<div class="box"></div>
+<script>
+    function PlaneGame(){
+        this.beatCount = 0
+        this.box = document.querySelector('.box')
+        this.boxW = parseFloat(window.getComputedStyle(this.box).width)
+        this.boxH = parseFloat(window.getComputedStyle(this.box).height)
+        this.init()
+    }
+    PlaneGame.prototype.init = function(){
+        var _this = this
+        this.createPlane()
+        setInterval(function(){
+            _this.createZiDan()
+        },150)
+        setInterval(function(){
+            _this.createDiji()
+        },600)
+    }
+    PlaneGame.prototype.createEle = function(tagName,className){
+        var tag =  document.createElement(tagName)
+        tag.className = className
+        return tag
+    }
+    PlaneGame.prototype.createPlane = function(){
+        var _this = this
+        var plane = this.createEle('div','plane')
+        this.box.appendChild(plane)
+//        console.log(plane);
+        window.onmousemove = function(e){
+            var planeW = plane.offsetWidth
+            var planeH = plane.offsetHeight
+            var fixW=_this.box.offsetLeft+5+(planeW/2)
+            var fixH=_this.box.offsetTop+5+(planeH/2)
+            var mx= e.clientX-fixW;
+            var my= e.clientY-fixH;
+            if(mx<0){
+                mx=-planeW/2;
+            }else if(mx>_this.boxW){
+                mx=_this.boxW-planeW/2;
+            }
+
+            if(my<=0){
+                my=0;
+            }else if(my>_this.boxH){
+                my=_this.boxH-planeH;
+            }
+            plane.style.top = my+'px'
+            plane.style.left = mx+'px'
+        }
+    }
+
+    PlaneGame.prototype.createZiDan = function(){
+        var _this = this
+        var zidan = this.createEle('div','zidan')
+        this.box.appendChild(zidan)
+        var plane = document.querySelector('.plane')
+        var zidanInitTop = plane.offsetTop-20
+        var zidanInitLeft = plane.offsetLeft+15
+        zidan.style.top = zidanInitTop+'px'
+        zidan.style.left = zidanInitLeft+'px'
+        this.animate(zidan,'top',zidanInitTop,0,function(ele){
+            ele.remove();
+        },function(zidanItem,aniId){
+            var dijiList = Array.from(document.querySelectorAll('.diji'))
+            if(dijiList&&dijiList.length){
+                dijiList.forEach(function(diji){
+                    var zdLeft = zidanItem.offsetLeft,
+                        zdTop = zidanItem.offsetTop,
+                        dijiLeft = diji.offsetLeft,
+                        dijiRight = diji.offsetLeft + diji.offsetWidth,
+                        dijiTop = diji.offsetTop,
+                        dijiBottom = dijiTop + diji.offsetHeight
+
+                    if(zdLeft>dijiLeft&&zdLeft<dijiRight&&zdTop<dijiBottom){
+                        diji.remove()
+                        zidanItem.remove()
+                        cancelAnimationFrame(aniId)
+                        _this.beatCount ++
+                        document.querySelector('.beatCount').innerText=_this.beatCount
+                    }
+                })
+//            console.log(dijiList);
+            }
+        })
+    }
+
+    PlaneGame.prototype.createDiji = function(){
+        var _this = this
+        var diji = this.createEle('div','diji')
+        this.box.appendChild(diji)
+        var dijiInitTop = 0
+        var dijiInitLeft = Math.random()*this.boxW
+        diji.style.top = dijiInitTop+'px'
+        diji.style.left = dijiInitLeft+'px'
+        this.animate(diji,'top',dijiInitTop,_this.boxH,function(ele){
+            ele.remove();
+        },null,0.1)
+    }
+
+
+    PlaneGame.prototype.animate = function(ele,styleName,initLocation,fallyLocation,callBack,ingFn,beishu){
+        var animateId = requestAnimationFrame(function(time){
+            move(time,function(ele){
+                callBack(ele)
+            })
+        })
+        var distant = 0
+        function move(time,cb){
+            distant++
+            if(initLocation>fallyLocation){
+                initLocation -= distant * (beishu || 1)
+                ele.style[styleName] =initLocation+'px'
+                ingFn && ingFn(ele,animateId)
+                if(initLocation>fallyLocation){
+                    animateId = requestAnimationFrame(function(){
+                        move(time,cb)
+                    })
+                }else{
+                    cancelAnimationFrame(animateId)
+                    cb(ele)
+                }
+            }else{
+                initLocation += distant * (beishu || 1)
+                ele.style[styleName] =initLocation+'px'
+                ingFn && ingFn(ele,animateId)
+                if(initLocation<fallyLocation){
+                    animateId = requestAnimationFrame(function(){
+                        move(time,cb)
+                    })
+                }else{
+                    cb(ele)
+                    cancelAnimationFrame(animateId)
+                }
+            }
+        }
+    }
+
+    new PlaneGame()
+
+</script>
+</body>
+</html>
