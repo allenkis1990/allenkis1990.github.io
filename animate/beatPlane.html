@@ -209,10 +209,30 @@
         tit.style.display =  'block'
         loading.style.display =  'none'
     }
-    window.onload = function(){
-        hideLoading()
-        new PlaneGame()
+
+    function imgReady(cb){
+        var imgList = ['./images/plane.png','./images/diji.png']
+        var imgCount = 0
+        imgList.forEach(function(item){
+            var img = new Image()
+            img.src = item
+            img.onload = function(){
+                imgCount ++
+                if(imgCount===imgList.length){
+                    cb && cb()
+                }
+            }
+        })
     }
+
+    window.onload = function(){
+        imgReady(function(){
+            hideLoading()
+            new PlaneGame()
+        })
+    }
+
+
 
 </script>
 </body>
