@@ -6,16 +6,17 @@
     <style>
         *{margin:0;padding:0;}
         .box{width:550px; height:710px; border:5px solid cornflowerblue; margin:10px auto 0;position:relative;overflow: hidden;}
-        .plane{width:40px;height:50px;background: url('./images/planes.png');background-size: contain;
+        .plane{width:40px;height:50px;background: url('./images/plane.png');background-size: contain;
 
             position: absolute;left:-100px;bottom:-100px;cursor: pointer }
         .zidan{width:10px; height:10px; background:blue; position: absolute;}
-        .diji{width:40px;height:40px;background:url('./images/dijis.png');background-size:contain;position: absolute;/*transition: opacity 0.2s*/}
+        .diji{width:40px;height:40px;background:url('./images/diji.png');background-size:contain;position: absolute;/*transition: opacity 0.2s*/}
         h2{text-align: center}
     </style>
 </head>
 <body>
-<h2>当前歼灭敌机<span style="color:red" class="beatCount">0</span>架</h2>
+<h2 class="loading" style="display:block">游戏加载中。。。</h2>
+<h2 class="tit" style="display:none">当前歼灭敌机<span style="color:red" class="beatCount">0</span>架</h2>
 <div class="box"></div>
 <script>
 
@@ -131,35 +132,6 @@
                         }
                     }
                 }
-
-//                dijiList.forEach(function(diji){
-//                    var zdLeft = zidanItem.offsetLeft,
-//                        zdTop = zidanItem.offsetTop,
-//                        dijiLeft = diji.offsetLeft,
-//                        dijiRight = diji.offsetLeft + diji.offsetWidth,
-//                        dijiTop = diji.offsetTop,
-//                        dijiBottom = dijiTop + diji.offsetHeight
-//
-//                    if(zdLeft>dijiLeft&&zdLeft<dijiRight&&zdTop<dijiBottom){
-////                        diji.remove()
-//                        zidanItem.remove()
-//                        _this.animate(diji,{opacity:0},function(dj){
-//                            dj.count = 0
-//                            dj.count++
-//                            if(dj.count===1){
-//                                if(dj){
-//                                    var txt = Number(document.querySelector('.beatCount').innerText)
-//                                    document.querySelector('.beatCount').innerText = txt+1
-//                                    dj.remove()
-//                                    dj = null
-//                                    cancelAnimationFrame(zdAniId)
-//                                }
-//                            }
-//                        },null,30)
-//                        zidanItem.beated = true
-//                    }
-//                })
-//            console.log(dijiList);
             }
         })
     }
@@ -229,7 +201,18 @@
         })
     }
 
-    new PlaneGame()
+
+
+    function hideLoading(){
+        var tit = document.querySelector('.tit')
+        var loading = document.querySelector('.loading')
+        tit.style.display =  'block'
+        loading.style.display =  'none'
+    }
+    window.onload = function(){
+        hideLoading()
+        new PlaneGame()
+    }
 
 </script>
 </body>
