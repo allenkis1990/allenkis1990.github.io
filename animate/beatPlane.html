@@ -122,12 +122,13 @@
                         }
                         if(!diji.beated){
                             zidanItem.remove()
+                            diji.style.backgroundImage = 'url("./images/fire.png")'
                             _this.animate(diji,{opacity:0},function(dj){
                                 _this.beatCount ++
                                 document.querySelector('.beatCount').innerText = _this.beatCount
                                 dj.remove()
                                 cancelAnimationFrame(zdAniId)
-                            },null,30)
+                            },null,1.2)
                             diji.beated = true
                         }
                     }
@@ -211,7 +212,7 @@
     }
 
     function imgReady(cb){
-        var imgList = ['./images/plane.png','./images/diji.png']
+        var imgList = ['./images/plane.png','./images/diji.png','./images/fire.png']
         var imgCount = 0
         imgList.forEach(function(item){
             var img = new Image()
