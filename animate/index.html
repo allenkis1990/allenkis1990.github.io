@@ -15,5 +15,22 @@
     <li><a href="/animate/pubuliu.html" target="_blank">瀑布流</a></li>
     <li><a href="/animate/beatPlane.html" target="_blank">打飞机小游戏</a></li>
 </ul>
+<script>
+    function A(){
+        this.name='parent'
+    }
+    A.prototype.haha= function(){
+        alert(1)
+    }
+
+    function B(){
+        A.call(this)
+    }
+
+
+    var b = new B()
+    console.log(b);
+
+</script>
 </body>
 </html>
