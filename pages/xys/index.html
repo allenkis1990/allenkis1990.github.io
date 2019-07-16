@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0,initial-scale=1.0">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+
+<div class="box">
+    <section class="banner-bg">
+        <div class="wrap-full">
+            <div class="banner-top clear">
+                <div class="logo fl">
+                    <img src="./images/logo.png" alt="">
+                </div>
+                <nav class="top-nav fl">
+                    <ul class="clear">
+                        <li><a href="#">首页</a></li>
+                        <li><a href="#">课程介绍</a></li>
+                        <li><a href="#">师资团队</a></li>
+                        <li><a href="#">机构动态</a></li>
+                        <li><a href="#">合作共赢</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<script>
+    function setFontSize(){
+        var root = document.documentElement
+        var fontSize = root.clientWidth/1920*100
+        root.style.fontSize = fontSize+'px'
+    }
+    window.onload = function(){
+        setFontSize()
+    }
+    window.addEventListener('resize',function(){
+        setFontSize()
+    })
+</script>
+</body>
+</html>
