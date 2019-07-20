@@ -151,11 +151,20 @@
     }
 
 
-    PlaneGame.prototype.animate = function(ele,options,callBack,ingFn,beishu){
+    PlaneGame.prototype.animate = function (ele,options,callBack,ingFn,beishu){
+        function doSpecFn(styleName,n){
+            if(styleName==='scrollTop'){
+                return function(){
+                    document.documentElement[styleName] = n
+                }
+            }else{
+                return false
+            }
+        }
         Object.keys(options).forEach(function(styleName,i){
             ele['animateId'+i] = requestAnimationFrame(function(time){
                 move(time,ele['animateId'+i],function(ele){
-                    callBack(ele)
+                    callBack&&callBack(ele)
                 })
             })
             var trueStyles = window.getComputedStyle(ele)
@@ -165,6 +174,7 @@
                 initBei = 1000
                 initNum = 1
             }
+            // debugger
             var initLocation = parseFloat(trueStyles[styleName]?trueStyles[styleName]:initNum)*initBei
             var fallyLocation = parseFloat(options[styleName])*initBei
 //            console.log(initLocation);
@@ -175,7 +185,14 @@
                 distant++
                 if(initLocation>fallyLocation){
                     initLocation -= distant * (beishu || 1)
-                    ele.style[styleName] =danwei? initLocation/initBei+danwei : initLocation/initBei
+                    var a = (initLocation/initBei)<=fallyLocation?fallyLocation:(initLocation/initBei)
+                    var n = danwei? a+danwei : a
+                    var spec = doSpecFn(styleName,n)
+                    if(spec){
+                        spec()
+                    }else{
+                        ele.style[styleName] =n
+                    }
                     ingFn && ingFn(ele,animateId)
                     if(initLocation>fallyLocation){
                         animateId = requestAnimationFrame(function(){
@@ -187,7 +204,14 @@
                     }
                 }else{
                     initLocation += distant * (beishu || 1)
-                    ele.style[styleName] =danwei? initLocation/initBei+danwei : initLocation/initBei
+                    var a = (initLocation/initBei)>=fallyLocation?fallyLocation:(initLocation/initBei)
+                    var n = danwei? a+danwei : a
+                    var spec = doSpecFn(styleName,n)
+                    if(spec){
+                        spec()
+                    }else{
+                        ele.style[styleName] =n
+                    }
                     ingFn && ingFn(ele,animateId)
                     if(initLocation<fallyLocation){
                         animateId = requestAnimationFrame(function(){
